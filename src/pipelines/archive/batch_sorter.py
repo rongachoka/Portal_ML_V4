@@ -1,0 +1,170 @@
+import os
+import re
+import random
+import easyocr
+import tensorflow as tf
+import numpy as np
+from tensorflow.keras.preprocessing.image import load_img, img_to_array
+from pathlib import Path
+from thefuzz import fuzz
+
+# --- CONFIGURATION ---
+BASE_DIR = Path(r"C:\\Users\\Portal Pharmacy\\Documents\\Portal ML Analys\\Ron's Work (2)\\Portal_ML\\Portal_ML_V4")
+MODEL_PATH = BASE_DIR / "models" / "portal_vision_model_v3.h5" 
+IMG_DIR = BASE_DIR / "data" / "sorted" / "product" / "sorted"
+CLASSES = ['Condition', 'Junk', 'Product']
+CONFIDENCE_THRESHOLD = 0.60 
+
+# 1. IMPORT BRAND LIST (The Single Source of Truth)
+try:
+    from Portal_ML_V4.src.config.brands import BRAND_LIST
+except ImportError:
+    print("⚠️ Warning: Could not import BRAND_LIST from config. Using fallback.")
+
+
+# 2. THE ALIAS DICTIONARY (The "Typo Fixer")
+ALIASES = {
+    # CeraVe Typos
+    "ceral": "CeraVe",
+    "cera ve": "CeraVe",
+    "cerave": "CeraVe",
+    "carave": "CeraVe",
+    "cerav": "CeraVe",
+
+    # La Roche-Posay Typos
+    "laroche": "La Roche Posay",
+    "posay": "La Roche Posay",
+    "larocheposay": "La Roche Posay",
+    "rocheposay": "La Roche Posay", 
+}
+
+# --- LOAD ENGINES ---
+print("⏳ Loading AI...")
+model = tf.keras.models.load_model(MODEL_PATH)
+print("📖 Loading Reader...")
+reader = easyocr.Reader(['en'], gpu=False) 
+
+# --- HELPERS ---
+def sanitize_brand(brand_name):
+    # 1. We removed 'dr' from this list so "Dr Organic" stays "Dr Organic"
+    ignore_words = ['the', 'la', 'el', 'le'] 
+    
+    parts = str(brand_name).lower().split()
+    if len(parts) > 1 and parts[0] in ignore_words:
+        clean = " ".join(parts[1:])
+    else:
+        clean = str(brand_name).lower()
+        
+    # 2. Remove special chars but KEEP letters/numbers
+    # "Dr. Organic" -> "drorganic" (Unique!)
+    return re.sub(r'[^a-zA-Z0-9]', '', clean)
+
+def analyze_product(filename):
+    path = IMG_DIR / filename
+    
+    # 1. VISION
+    try:
+        img = load_img(path, target_size=(224, 224))
+        arr = img_to_array(img) / 255.0
+        arr = np.expand_dims(arr, axis=0)
+        
+        pred = model.predict(arr, verbose=0)
+        label = CLASSES[np.argmax(pred[0])]
+        confidence = np.max(pred[0])
+        
+        if label != 'Product': return
+        if confidence < CONFIDENCE_THRESHOLD: return 
+
+    except: return
+
+    # 2. OCR
+    try:
+        results = reader.readtext(str(path), detail=0)
+        raw_text_spaced = " ".join(results).lower()
+        clean_text = re.sub(r'[^a-zA-Z0-9]', '', raw_text_spaced)
+        
+        print(f"\n📸 {filename} | Product: {confidence:.1%}")
+        # print(f"   📖 Read: {raw_text_spaced[:60]}...") 
+        
+    except: return
+
+    # 3. BRAND MATCHING
+    
+    found_brand = None
+    best_match_name = "None"
+    highest_score = 0
+
+    # --- PHASE A: CHECK ALIASES FIRST (Instant Win) ---
+    for typo, correct_brand in ALIASES.items():
+        if len(typo) < 4:
+            pattern = r'\b' + re.escape(typo) + r'\b'
+            if re.search(pattern, raw_text_spaced):
+                print(f"   🚀 ALIAS MATCH: '{typo}' -> {correct_brand}")
+                found_brand = correct_brand
+                break
+        else:
+            clean_typo = re.sub(r'[^a-zA-Z0-9]', '', typo)
+            if clean_typo in clean_text:
+                print(f"   🚀 ALIAS MATCH: '{typo}' -> {correct_brand}")
+                found_brand = correct_brand
+                break
+    
+    if found_brand:
+        print(f"   ✅ RESULT: {found_brand}")
+        print("-" * 40)
+        return 
+
+    # --- PHASE B: FUZZY MATCHING ---
+    for brand in BRAND_LIST:
+        brand_str = str(brand).upper()
+        search_term = sanitize_brand(brand_str)
+        term_len = len(search_term)
+        
+        if term_len < 3: continue 
+
+        # Exact Match
+        if term_len < 5:
+            pattern = r'\b' + re.escape(brand_str.lower()) + r'\b'
+            if re.search(pattern, raw_text_spaced):
+                 print(f"   🎯 EXACT MATCH: {brand_str}")
+                 found_brand = brand_str
+                 break 
+        elif search_term in clean_text:
+             print(f"   🎯 EXACT MATCH: {brand_str}")
+             found_brand = brand_str
+             break
+
+        # Fuzzy Match
+        score = fuzz.partial_ratio(search_term, clean_text)
+        
+        if score > highest_score:
+            highest_score = score
+            best_match_name = brand_str
+            
+            # Strict Sliding Scale
+            if term_len < 5: threshold = 100 
+            elif term_len == 5: threshold = 95
+            elif term_len == 6: threshold = 82 
+            elif term_len == 7: threshold = 90
+            else: threshold = 85
+            
+            if score >= threshold:
+                found_brand = best_match_name
+
+    if found_brand:
+        print(f"   ✅ RESULT: {found_brand}")
+    else:
+        print(f"   ⚠️  Unknown (Best: {best_match_name} @ {highest_score})")
+    print("-" * 40)
+
+if __name__ == "__main__":
+    if not os.path.exists(IMG_DIR):
+        print(f"❌ Error: Path not found: {IMG_DIR}")
+    else:
+        all_products = [f for f in os.listdir(IMG_DIR) if f.lower().endswith('.jpg')]
+        if len(all_products) > 0:
+            sample = random.sample(all_products, min(10, len(all_products)))
+            for f in sample:
+                analyze_product(f)
+        else:
+            print("⚠️ Folder is empty.")
