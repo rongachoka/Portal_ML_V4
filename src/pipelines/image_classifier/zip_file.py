@@ -1,3 +1,17 @@
+"""
+zip_file.py
+===========
+Google Colab utility: zips the Brand_Images_TopDown training dataset from Drive.
+
+Mounts Google Drive in a Colab runtime, zips the image training folder, and
+saves the archive to Drive for transfer or backup.
+
+Input:  Google Drive: /Portal_ML/.../Brand_Images_TopDown/
+Output: Google Drive: Brand_Images_TopDown.zip
+
+Run inside Google Colab before training on a new environment.
+"""
+
 import os
 import shutil
 from google.colab import drive

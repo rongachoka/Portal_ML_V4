@@ -1,3 +1,19 @@
+"""
+brand_scraper.py
+================
+Scrapes product prices and availability for brands stocked at Portal Pharmacy.
+
+For each brand in the Knowledge Base, sends HTTP requests to the brand's
+website or a pharmacy price comparison site, extracts product names and
+prices, and saves results for KB enrichment.
+
+Input:  data/01_raw/Final_Knowledge_Base_PowerBI.csv  (brand list source)
+Output: scraped price CSV saved to data/01_raw/ (path set inside script)
+
+Run manually when updating the KB with competitor or own-store pricing.
+Respects rate limits with random delays between requests.
+"""
+
 import random
 import re
 import time

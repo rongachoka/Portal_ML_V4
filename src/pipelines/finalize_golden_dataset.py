@@ -1,3 +1,18 @@
+"""
+finalize_golden_dataset.py
+==========================
+One-time utility: cleans mojibake encoding artefacts in the product Knowledge Base.
+
+Reads the manually-verified Golden_Product_Catalog_Verified.csv, fixes
+cp1252/utf-8 encoding errors (curly quotes, accented characters, em-dashes),
+and writes the clean final Knowledge Base file used by all pipeline modules.
+
+Input:  data/01_raw/Golden_Product_Catalog_Verified.csv
+Output: data/01_raw/Final_Knowledge_Base_PowerBI.csv
+
+Run manually whenever a new KB version is imported.
+"""
+
 import pandas as pd
 import numpy as np
 import re

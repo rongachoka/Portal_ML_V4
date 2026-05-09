@@ -1,3 +1,18 @@
+"""
+extract_customers_pos_history.py
+=================================
+Exports a multi-sheet POS customer Excel report from the full sales history.
+
+Reads all_locations_sales_FULL_HISTORY.csv and produces an Excel workbook
+with one sheet per branch, each containing customer lifetime spend grouped
+by normalised phone number.
+
+Input:  data/03_processed/pos_data/all_locations_sales_FULL_HISTORY.csv
+Output: data/03_processed/customer_pos_lifetime_report.xlsx
+
+Entry point: run_pos_excel_export() (run manually as needed)
+"""
+
 import pandas as pd
 import os
 from pathlib import Path

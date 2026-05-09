@@ -1,3 +1,16 @@
+"""
+scraping_test.py
+================
+Test harness for web scraping logic and image download utilities.
+
+Used to prototype and validate scraping approaches before adding them to
+brand_scraper.py or competitor_scraper.py. Also tests DuckDuckGo image
+search (via ddgs) and fastai image verification for training data collection.
+
+Input:  web URLs / search queries (hardcoded inside script)
+Output: downloaded images or console scraping output (for testing only)
+"""
+
 import re
 import time
 import warnings

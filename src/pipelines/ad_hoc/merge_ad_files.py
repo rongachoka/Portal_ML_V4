@@ -1,3 +1,18 @@
+"""
+merge_ad_files.py
+=================
+Merges all Meta Ads CSV exports into a single consolidated ads file.
+
+Scans for all Meta Ads CSV files matching the expected naming pattern,
+deduplicates on Ad ID, applies AD_NAME_MAP to normalise campaign names,
+and writes the merged result for use by ad_performance.py.
+
+Input:  data/01_raw/meta_ads/Caroline-Mwangi-Ads-*.csv  (multiple date-range files)
+Output: data/03_processed/ads/all_ads_merged.csv
+
+Run manually after downloading a new Meta Ads export.
+"""
+
 import glob
 from pathlib import Path
 

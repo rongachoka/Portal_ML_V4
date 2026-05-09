@@ -1,3 +1,18 @@
+"""
+data_augmentation.py
+====================
+Augments the brand image training dataset using Keras ImageDataGenerator.
+
+For each brand class with too few images, generates synthetic variations
+(rotation, zoom, flip, brightness shift) to reach the target sample count,
+and saves them alongside the originals.
+
+Input:  Brand_Images_TopDown/{brand}/ — existing training images
+Output: Additional augmented images written into the same brand subfolders
+
+Run manually before model training when any class has fewer than ~50 images.
+"""
+
 import random
 from pathlib import Path
 

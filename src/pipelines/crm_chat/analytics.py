@@ -1,3 +1,31 @@
+"""
+analytics.py
+============
+Main analytics pipeline — produces all fact tables consumed by Power BI.
+
+Runs twice per pipeline cycle:
+  Pass 1 (pre-attribution): generates fact_sessions_enriched.csv so the
+          attribution pipeline has sessions to match against. ordered_via
+          is empty at this stage — expected.
+  Pass 2 (post-attribution): re-reads fact_sessions_enriched.csv with
+          ordered_via stamped back in, producing the final versions of all
+          fact tables.
+
+Inputs:
+    data/03_processed/final_tagged_sessions.parquet — ML-tagged sessions
+    data/01_raw/Respond IO Messages History.csv     — raw message log
+    data/01_raw/Final_Knowledge_Base_PowerBI.csv    — product KB
+    data/03_processed/pos_data/all_locations_sales*.csv — POS data (Pass 2)
+
+Outputs (all to data/03_processed/):
+    fact_sessions_enriched.csv    — one row per session, all tags + tiers
+    fact_staff_performance*.csv   — per-agent session metrics
+    social_sales_direct.csv       — sessions matched to cashier ordered_via
+    (and several supporting dimension/fact tables)
+
+Entry point: run_analytics_pipeline()
+"""
+
 import os
 import re
 import sys

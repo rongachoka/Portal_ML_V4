@@ -1,3 +1,23 @@
+"""
+website_orders.py
+=================
+ETL for website orders — cleans and structures the portal_order_with_prices CSV.
+
+Normalises customer names, phone numbers, and order statuses, deduplicates
+line items via order-product fingerprinting, and writes three output tables
+used by the client export and Power BI dashboards.
+
+Input:
+    data/01_raw/website/portal_order_with_prices.csv
+
+Outputs:
+    data/03_processed/website_data/fact_website_orders.csv    — one row per order
+    data/03_processed/website_data/website_dim_clients.csv    — unique customers
+    data/03_processed/website_data/website_fact_lineitems.csv — one row per line item
+
+Entry point: run_website_orders_etl()
+"""
+
 import pandas as pd
 import numpy as np
 import re

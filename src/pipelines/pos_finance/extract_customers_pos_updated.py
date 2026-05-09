@@ -1,3 +1,20 @@
+"""
+extract_customers_pos_updated.py
+=================================
+Generates a POS customer lifetime Excel report from the full sales history.
+
+Reads all_locations_sales_FULL_HISTORY.csv, groups by normalised phone number,
+and computes lifetime spend, transaction count, and branch breakdown.
+Also cross-checks cashier vs sales data and outputs a discrepancy CSV.
+
+Input:  data/03_processed/pos_data/all_locations_sales_FULL_HISTORY.csv
+Output:
+    data/03_processed/crm/customer_pos_lifetime_report_updateds.xlsx
+    data/03_processed/crm/pos_cashier_discrepancies.csv
+
+Entry point: run_pos_customer_report() (run manually as needed)
+"""
+
 import pandas as pd
 import os
 import re

@@ -1,3 +1,17 @@
+"""
+extract_customer_list.py
+========================
+Exports a customer lifetime value summary from the session analytics output.
+
+Reads fact_sessions_enriched.csv and aggregates per-contact: total sessions,
+M-Pesa conversion count, total M-Pesa spend, and lifetime tier.
+
+Input:  data/03_processed/fact_sessions_enriched.csv
+Output: data/03_processed/customer_lifetime_value_export.csv
+
+Entry point: run_customer_export()
+"""
+
 import pandas as pd
 import numpy as np
 import os

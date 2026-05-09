@@ -1,3 +1,23 @@
+"""
+text_cleaner.py
+===============
+Cleans and filters raw Respond.io message content for ML processing.
+
+Functions:
+    extract_message_text(content) → str
+        Parses raw message content (plain text, JSON media payloads, URLs)
+        into a clean string suitable for session context aggregation.
+    is_system_message(text) → bool
+        Returns True for automated/workflow messages that should be excluded
+        from session context (matched via SYSTEM_PATTERNS from constants.py).
+    is_low_signal_text(text) → bool
+        Returns True for sessions with too little content to classify
+        (e.g. single-word replies, greetings, emoji-only).
+
+Input:  raw message Content strings from Respond.io CSV
+Output: cleaned text strings and boolean filter flags, consumed by ml_inference.py
+"""
+
 # Portal_ML_V4/src/utils/text_cleaner.py
 
 import os

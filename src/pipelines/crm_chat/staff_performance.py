@@ -1,3 +1,21 @@
+"""
+staff_performance.py
+====================
+Generates per-agent performance metrics by cross-referencing chat sessions
+with POS cashier data.
+
+Inputs:
+    data/03_processed/fact_sessions_enriched.csv  — session data with assignee
+    data/02_interim/cleaned_messages.csv          — granular message log
+
+Output:
+    data/03_processed/Staff_Performance_Test.csv
+    — one row per staff member, with session count, conversion rate,
+      average response time, M-Pesa collections, and POS revenue cross-ref
+
+Entry point: run_staff_analysis()
+"""
+
 import pandas as pd
 import numpy as np
 import re

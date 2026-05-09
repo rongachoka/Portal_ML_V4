@@ -1,3 +1,15 @@
+"""
+brands.py
+=========
+Master brand reference data for Portal Pharmacy.
+
+Exports:
+    BRAND_LIST      — Canonical list of all stocked brand names used for
+                      brand detection in chat sessions and POS matching.
+    BRAND_ALIASES   — Dict mapping common shorthand/misspellings to the
+                      canonical brand name (e.g. "lrp" → "La Roche-Posay").
+"""
+
 # src/config/brands.py
 
 # =============================================================================

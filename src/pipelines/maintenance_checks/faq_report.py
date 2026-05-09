@@ -1,3 +1,18 @@
+"""
+faq_report.py
+=============
+Generates a FAQ frequency report from tagged session data using spaCy NLP.
+
+Extracts noun phrases from session full_context, filters for brand and concern
+mentions, and ranks the most frequently asked questions per concern category.
+Requires the spacy en_core_web_sm model.
+
+Input:  data/03_processed/final_tagged_sessions.parquet
+Output: console report / saved CSV (path set inside script)
+
+Run manually to surface the most common customer questions for content planning.
+"""
+
 import pandas as pd
 import re
 import os

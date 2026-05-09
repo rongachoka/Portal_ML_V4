@@ -1,3 +1,21 @@
+"""
+ollama_kb_update.py
+===================
+Uses a local Ollama LLM to enrich the Knowledge Base with concern mappings.
+
+For each product in the KB, queries the Ollama model (local LLM) with the
+product name and category to suggest which customer concern(s) the product
+addresses. Results are written back to the KB CSV for use in tag_rules.py.
+
+Inputs:
+    data/01_raw/Final_Knowledge_Base_PowerBI.csv
+    data/01_raw/Concerns List V1(Sheet1).csv  — master concern taxonomy
+Output: Updated KB CSV with a new Concerns column
+
+Requires Ollama running locally (ollama serve). Run manually when expanding
+the KB with new products or new concern categories.
+"""
+
 import pandas as pd
 import ollama
 from pathlib import Path

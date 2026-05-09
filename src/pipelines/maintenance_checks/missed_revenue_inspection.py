@@ -1,3 +1,20 @@
+"""
+missed_revenue_inspection.py
+============================
+Diagnostic: investigates "ghost sales" — converted sessions with no matched staff.
+
+Loads fact_sessions_enriched.csv and identifies sessions marked as converted
+(is_converted=1 or mpesa_amount > 0) but missing from the staff performance report,
+flagging them for investigation. Outputs a debug CSV for manual review.
+
+Inputs:
+    data/02_interim/cleaned_conversations.csv
+    data/03_processed/fact_sessions_enriched.csv
+Output: data/03_processed/debug_ghost_sales.csv
+
+Run manually when ghost sale counts are unexpectedly high.
+"""
+
 import pandas as pd
 from pathlib import Path
 from Portal_ML_V4.src.config.settings import INTERIM_DATA_DIR, PROCESSED_DATA_DIR

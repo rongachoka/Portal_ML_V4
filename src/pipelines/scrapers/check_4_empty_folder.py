@@ -1,3 +1,16 @@
+"""
+check_4_empty_folder.py
+=======================
+Utility: lists empty subdirectories in the Brand_Images_TopDown folder.
+
+Scans the image training data directory and reports any brand subfolders
+that contain no image files. Used before model training to catch missing
+image sets.
+
+Input:  G:/My Drive/Portal_ML/.../Brand_Images_TopDown/ (Google Drive path)
+Output: console list of empty folder paths
+"""
+
 from pathlib import Path
 
 

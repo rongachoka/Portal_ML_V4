@@ -1,3 +1,24 @@
+"""
+analytics_copy.py
+=================
+V3 analytics pipeline — local variant called by run_pipeline_copy.py.
+
+Produces fact_sessions_enriched.csv and supporting fact tables from the
+ML-tagged sessions. Called twice per morning run (pre- and post-attribution)
+to produce the final Power BI outputs with ordered_via populated.
+
+Inputs:
+    data/03_processed/final_tagged_sessions.parquet
+    data/02_interim/cleaned_contacts.parquet
+    data/03_processed/pos_data/all_locations_sales*.csv  (Pass 2 only)
+
+Outputs (all to data/03_processed/):
+    fact_sessions_enriched.csv, fact_staff_performance*.csv,
+    and supporting dimension tables
+
+Entry point: run_analytics_pipeline()
+"""
+
 import os
 import re
 from functools import lru_cache

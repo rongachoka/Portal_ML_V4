@@ -1,3 +1,27 @@
+"""
+cleaning_local_copy.py
+======================
+V3 Respond.io data cleaner — local variant called by run_pipeline_copy.py.
+
+Reads the three Respond.io CSV exports (messages, conversations, contacts),
+cleans and normalises them, and writes interim parquet + CSV files for the
+downstream ML inference step. Does not use DB staging or watermarks
+(full reload on every run).
+
+Inputs:
+    data/01_raw/Respond IO Messages History.csv
+    data/01_raw/Respond IO Conversations History.csv
+    data/01_raw/Respond IO Contacts History.csv
+    data/01_raw/ads/  — Meta Ads contact files (merged onto messages)
+
+Outputs:
+    data/02_interim/cleaned_messages.parquet / .csv
+    data/02_interim/cleaned_conversations.parquet / .csv
+    data/02_interim/cleaned_contacts.parquet / .csv
+
+Entry point: run_production_cleaning()
+"""
+
 import pandas as pd
 import os
 from pathlib import Path

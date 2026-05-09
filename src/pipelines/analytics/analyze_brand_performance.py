@@ -1,3 +1,21 @@
+"""
+analyze_brand_performance.py
+============================
+Brand-level performance analysis over attributed social media sessions.
+
+Aggregates session and conversion data from the enriched attribution output
+grouped by Matched_Brand, computing inquiry count, conversion rate, and
+average revenue per brand. Cross-references the Knowledge Base for category
+grouping.
+
+Inputs:
+    data/03_processed/sales_attribution/final_enriched_social_sales_Jan25_Jan26.csv
+    data/01_raw/Final_Knowledge_Base_PowerBI.csv
+Output: console report / CSV (path set inside script)
+
+Run manually for brand performance deep-dives.
+"""
+
 import pandas as pd
 import numpy as np
 import re

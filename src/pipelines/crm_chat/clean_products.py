@@ -1,3 +1,23 @@
+"""
+clean_products.py
+=================
+Cleans and fuzzy-matches POS product descriptions against the Knowledge Base.
+
+For each product description in the attributed sales output, applies token
+matching and fuzzy similarity to assign Matched_Brand, Matched_Product,
+and Canonical_Category from the KB.
+
+Inputs:
+    data/03_processed/sales_attribution/final_enriched_social_sales_Jan25_Jan26.csv
+    data/01_raw/Final_Knowledge_Base_PowerBI.csv
+
+Output:
+    data/03_processed/fact_social_sales_attribution_enriched.csv
+    — attribution file with brand/product/category columns filled in
+
+Entry point: run_clean_products() (called manually or from reporting scripts)
+"""
+
 import pandas as pd
 import numpy as np
 import re

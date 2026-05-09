@@ -1,3 +1,21 @@
+"""
+merge_inventory.py
+==================
+Merges POS inventory data with scraped website prices to build the Golden Product Catalog.
+
+Fuzzy-matches product names from the POS inventory export against scraped website
+listings (SequenceMatcher, threshold 0.80), combines price and category data,
+and outputs a verified catalog for finalize_golden_dataset.py to clean.
+
+Inputs:
+    data/01_raw/Products 31 Jan.csv        — POS inventory export
+    data/01_raw/scraped_prices_jan2026.csv — scraped website prices
+Output:
+    data/01_raw/Golden_Product_Catalog_Verified.csv
+
+Run manually after a new inventory export or website scrape.
+"""
+
 import pandas as pd
 import numpy as np
 import re

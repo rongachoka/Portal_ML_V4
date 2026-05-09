@@ -1,3 +1,20 @@
+"""
+customer_check.py
+=================
+Diagnostic: validates staff performance session count against total session count.
+
+Compares the number of unique contacts in fact_sessions_enriched.csv vs
+fact_staff_performance*.csv. The difference represents bot/ghost sessions
+not attributable to a human agent.
+
+Inputs:
+    data/03_processed/fact_sessions_enriched.csv
+    data/03_processed/fact_staff_performance_v6_granular.csv
+Output: console report with contact counts and difference breakdown
+
+Run manually to verify staff performance completeness.
+"""
+
 import pandas as pd
 from Portal_ML_V4.src.config.settings import PROCESSED_DATA_DIR
 

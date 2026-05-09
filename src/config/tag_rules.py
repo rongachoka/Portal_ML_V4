@@ -1,3 +1,21 @@
+"""
+tag_rules.py
+============
+Canonical category inference rules applied to both chat text and product descriptions.
+
+Exports:
+    CANONICAL_CATEGORY_RULES — Dict mapping canonical category label to regex
+                                patterns, split by source ("all", "chat", "product").
+    CONCERN_RULES            — Dict mapping concern label to source-split patterns.
+    enrich_canonical_categories_from_text(text, existing, source) → set
+                             — Applies CANONICAL_CATEGORY_RULES to a text string
+                               and returns matched category tags.
+    extract_concerns_from_text(text) → set
+                             — Applies CONCERN_RULES and returns matched concern tags.
+
+Inputs:  raw text strings from chat sessions or product descriptions
+Outputs: sets of canonical tag strings (e.g. {"Product Inquiry - Skincare", "Acne"})
+"""
 
 import re
 from typing import Dict, List, Set

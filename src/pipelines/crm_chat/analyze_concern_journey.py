@@ -1,3 +1,26 @@
+"""
+analyze_concern_journey.py
+==========================
+Maps the path from initial customer concern to purchase across sessions.
+
+For each concern category (acne, hyperpigmentation, etc.), identifies
+sessions where that concern was raised, then traces whether the customer
+subsequently converted (M-Pesa payment or ordered_via = respond.io),
+what product they bought, and how many sessions elapsed before conversion.
+
+Inputs:
+    data/02_interim/cleaned_messages.parquet      — raw message log
+    data/03_processed/fact_sessions_enriched.csv  — session-level data
+    data/01_raw/Final_Knowledge_Base_PowerBI.csv  — product catalogue
+
+Output:
+    data/03_processed/report_concern_journey_analysis.csv
+    — one row per (concern × contact), with conversion flag, product bought,
+      days-to-convert, and price objection indicators
+
+Entry point: run_journey_analysis()
+"""
+
 import pandas as pd
 import numpy as np
 import re

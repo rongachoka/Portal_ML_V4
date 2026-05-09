@@ -1,3 +1,25 @@
+"""
+enrich_attribution_products.py
+===============================
+Labels brands and categories on attributed social media sales by fuzzy-matching
+POS descriptions against the Knowledge Base.
+
+Reads the attribution waterfall output and, for each line item, attempts to
+match the POS description to a KB product using brand detection + fuzzy
+token similarity (SequenceMatcher). Outputs an enriched file with
+Matched_Brand, Matched_Product, and Canonical_Category columns.
+
+Inputs:
+    data/03_processed/sales_attribution/attributed_sales_waterfall_v7.csv
+    data/03_processed/fact_sessions_enriched.csv
+    data/01_raw/Final_Knowledge_Base_PowerBI.csv
+
+Output:
+    data/03_processed/sales_attribution/social_sales_Jan25_Jan26.csv
+
+Entry point: run_smart_enrichment()
+"""
+
 import pandas as pd
 import numpy as np
 import re

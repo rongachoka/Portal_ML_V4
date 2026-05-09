@@ -1,3 +1,20 @@
+"""
+constants.py
+============
+ML label definitions and system-message filter patterns.
+
+Exports:
+    ML_LABELS           — Ordered list of category labels fed to the CrossEncoder
+                          during AI classification in ml_inference.py.
+    ML_TO_RESP          — Maps each ML label to its Respond.io canonical tag string.
+    SYSTEM_PATTERNS     — Regex patterns identifying automated/system messages
+                          that should be excluded from session context.
+    LOW_SIGNAL_PHRASES  — Short phrases that indicate a session carries no
+                          classifiable content (e.g. "ok", "thanks").
+    SUPPLEMENT_KEYWORDS, SKINCARE_KEYWORDS, BABY_KEYWORDS
+                        — Keyword sets used by text_cleaner.py for heuristic
+                          category pre-filtering.
+"""
 
 # Imports
 import re

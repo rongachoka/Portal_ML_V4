@@ -1,5 +1,17 @@
+"""
+concerns.py
+===========
+Regex keyword patterns for customer skin and health concerns.
+
+Exports:
+    CONCERN_KEYWORDS — Dict mapping concern label (e.g. "Acne-Prone Skin")
+                       to a list of regex patterns matched against chat text.
+                       Used by signal_detectors.py and ml_inference.py to
+                       tag sessions with relevant concern labels.
+"""
+
 import re
- 
+
 CONCERN_KEYWORDS = {
     # ── SKINCARE CONCERNS ──────────────────────────────────────────────────
     "Acne-Prone Skin": [

@@ -1,3 +1,17 @@
+"""
+customer_tiers.py
+=================
+Diagnostic: plots customer spend distribution from the RFV (Recency-Frequency-Value) table.
+
+Loads dim_customers_rfv.csv and renders a scatter plot of total spend per customer
+with tier threshold lines (20k and 50k KES). Useful for validating tier boundaries.
+
+Input:  data/03_processed/dim_customers_rfv.csv
+Output: matplotlib plot rendered to screen (not saved to disk)
+
+Run manually to inspect tier distributions.
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import os

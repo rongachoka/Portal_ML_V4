@@ -1,3 +1,16 @@
+"""
+audit_fuzzy.py
+==============
+Diagnostic: spot-checks the fuzzy matching logic in enrich_attribution_products.py.
+
+Runs a side-by-side comparison of POS description vs KB description through
+the clean_text_for_matching and fuzzy_similarity functions and prints the
+similarity score. Also reports top brand distribution in the attribution output.
+
+Input:  data/03_processed/sales_attribution/social_sales_Jan25_Jan26.csv
+Output: console report of match scores and brand value counts
+"""
+
 # # from Portal_ML_V4.src.pipelines.attribution.enrich_attribution_products import *
 
 # # a = clean_text_for_matching("CERAVE MOIST LOTION DRY/ V.DRY")

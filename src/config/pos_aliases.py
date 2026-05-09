@@ -1,3 +1,17 @@
+"""
+pos_aliases.py
+==============
+Central lookup tables for POS description normalisation.
+
+Exports:
+    TERM_ALIASES  — Dict mapping POS abbreviations, typos and shorthand to
+                    their full canonical form (e.g. "SPF" → "Sun Protection").
+    BRAND_ALIASES — Dict mapping POS brand shorthand to canonical brand names.
+
+Imported by: enrich_attribution_products.py, social_sales_direct.py,
+             social_sales_etl.py, analytics.py.
+"""
+
 # src/config/pos_aliases.py
 # =============================================================================
 # POS TERM ALIASES, TYPO CORRECTIONS & BRAND ALIASES

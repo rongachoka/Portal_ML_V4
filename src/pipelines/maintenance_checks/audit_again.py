@@ -1,3 +1,18 @@
+"""
+audit_again.py
+==============
+Diagnostic: reconciles M-Pesa total from sessions against social sales matches.
+
+Loads fact_sessions_enriched.csv, sums all M-Pesa amounts for converted
+sessions, then splits the total into matched vs unmatched against the
+social_sales_Jan25_Jan26.csv attribution output.
+
+Inputs:
+    data/03_processed/fact_sessions_enriched.csv
+    data/03_processed/sales_attribution/social_sales_Jan25_Jan26.csv
+Output: console report of matched vs unmatched M-Pesa revenue
+"""
+
 import pandas as pd
 from Portal_ML_V4.src.config.settings import PROCESSED_DATA_DIR
 

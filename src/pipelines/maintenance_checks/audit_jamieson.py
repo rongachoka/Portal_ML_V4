@@ -1,10 +1,23 @@
+"""
+audit_jamieson.py
+=================
+Diagnostic: investigates brand alias matching for a specific brand (Jamieson).
+
+Filters the attribution output for a target brand and prints all matched
+transactions, then tests the brand alias regex patterns. Used as a template
+for investigating any specific brand's match quality.
+
+Input:  data/03_processed/sales_attribution/social_sales_Jan25_Jan26.csv
+Output: console report of brand-specific transaction rows
+"""
+
 # import pandas as pd
 # from Portal_ML_V4.src.config.settings import PROCESSED_DATA_DIR
 
 # df = pd.read_csv(PROCESSED_DATA_DIR / "sales_attribution" / "social_sales_Jan25_Jan26.csv")
 
 # jamieson = df[df['Matched_Brand'] == 'Jamieson']
-# print(jamieson[['Transaction ID', 'Description', 'Qty Sold', 
+# print(jamieson[['Transaction ID', 'Description', 'Qty Sold',
 #                 'Total (Tax Ex)', 'Matched_Brand', 'Matched_Product']].to_string())
 
 

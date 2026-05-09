@@ -1,3 +1,22 @@
+"""
+settings.py
+===========
+Central configuration: all file paths, ML thresholds, and database credentials.
+
+Reads .env from the project root for DB and API secrets. Every other module
+imports paths and constants from here — nothing should hardcode a file path.
+
+Key exports:
+    RAW_DATA_DIR, INTERIM_DATA_DIR, PROCESSED_DATA_DIR — data layer roots
+    MSG_HISTORY_RAW, CONV_HISTORY_RAW, CONTACTS_HISTORY_RAW — Respond.io source CSVs
+    MSG_INTERIM_PARQUET, FINAL_TAGGED_DATA — inter-stage data files
+    KB_PATH          — Knowledge Base CSV path
+    META_ADS_DIR     — Latest Meta Ads CSV (auto-selected by mtime)
+    DB_CONNECTION_STRING — PostgreSQL SQLAlchemy URL (built from .env)
+    SESSION_GAP_HOURS, CATEGORY_CONFIDENCE_THRESHOLD — ML tuning knobs
+    DRIVE_ID         — SharePoint drive ID for the downloader
+"""
+
 import os
 import glob
 from pathlib import Path

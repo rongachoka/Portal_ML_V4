@@ -1,3 +1,18 @@
+"""
+clean_inventory.py
+==================
+Cleans a raw POS item quantity CSV and maps departments to canonical categories.
+
+Reads the Item Quantity List export from the POS system, applies
+DEPARTMENT_TO_CANONICAL regex mapping to normalise department names,
+and outputs a clean master inventory file.
+
+Input:  data/01_raw/Item Quantity List_18jan2026.csv  (or equivalent)
+Output: data/01_raw/clean_master_inventory.csv
+
+Run manually after each POS inventory export.
+"""
+
 import pandas as pd
 import numpy as np
 import re

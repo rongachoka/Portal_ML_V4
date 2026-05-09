@@ -1,3 +1,18 @@
+"""
+audit_again_2.py
+================
+Diagnostic: February 2026 M-Pesa revenue reconciliation.
+
+Filters fact_sessions_enriched.csv to February 2026, aggregates M-Pesa
+collections by week, and cross-references against the social sales attribution
+output to identify unmatched revenue in that specific month.
+
+Inputs:
+    data/03_processed/fact_sessions_enriched.csv
+    data/03_processed/sales_attribution/social_sales_Jan25_Jan26.csv
+Output: console report of weekly M-Pesa totals and match rate for Feb 2026
+"""
+
 import pandas as pd
 from Portal_ML_V4.src.config.settings import PROCESSED_DATA_DIR
 from Portal_ML_V4.src.utils.phone import normalize_phone

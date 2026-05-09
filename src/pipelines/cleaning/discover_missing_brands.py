@@ -1,3 +1,18 @@
+"""
+discover_missing_brands.py
+==========================
+Diagnostic utility: surfaces unmatched product descriptions in attribution output.
+
+Scans the enriched social sales CSV for rows where Matched_Brand == "Unknown",
+tokenises the description, and reports the most common leading tokens — these
+are candidates to add to BRAND_LIST or BRAND_ALIASES in config/brands.py.
+
+Input:  data/03_processed/sales_attribution/final_enriched_social_sales_Jan25_Jan26.csv
+Output: console report of unmatched token frequencies
+
+Run manually after a KB update or when Unknown Brand counts are high.
+"""
+
 import pandas as pd
 import re
 from collections import Counter

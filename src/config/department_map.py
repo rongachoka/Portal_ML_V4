@@ -1,3 +1,15 @@
+"""
+department_map.py
+=================
+Maps POS department/category strings to canonical Respond.io product inquiry labels.
+
+Exports:
+    DEPARTMENT_TO_CANONICAL — Dict of regex pattern → canonical tag string.
+                              Used by analytics.py and social_sales_etl.py to
+                              normalise raw POS department names into the same
+                              category vocabulary used by the chat pipeline.
+"""
+
 DEPARTMENT_TO_CANONICAL = {
     # --- MEDICINE ---
     r"GENERAL PRESCRIPTION": "Product Inquiry - Medicine",

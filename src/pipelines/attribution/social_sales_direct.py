@@ -2,7 +2,7 @@
 social_sales_direct.py
 ======================
 Produces an accurate social media sales report by:
-  1. Reading all_locations_sales_Jan25-Jan26.csv directly
+  1. Reading all_locations_sales_NEW.csv directly
   2. Filtering to rows where Ordered Via = respond.io
   3. Matching each POS description to the Knowledge Base for brand/product/category
   4. Outputting social_sales_direct.csv for Power BI

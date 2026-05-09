@@ -1,3 +1,18 @@
+"""
+respond_io_tags.py
+==================
+Builds a contact tag CSV for Respond.io broadcast uploads from attribution data.
+
+Reads the enriched social sales file, extracts one row per contact with their
+aggregated Matched_Concern, Matched_Brand, and Canonical_Category, and formats
+the output as a Respond.io importable CSV.
+
+Input:  data/03_processed/sales_attribution/final_enriched_social_sales_Jan25_Jan26.csv
+Output: data/03_processed/respond_io/contact_tags_for_broadcast_upload.csv
+
+Run manually before a Respond.io broadcast campaign.
+"""
+
 import pandas as pd
 import numpy as np
 from pathlib import Path

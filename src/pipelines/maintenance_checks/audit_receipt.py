@@ -1,3 +1,16 @@
+"""
+audit_receipt.py
+================
+Diagnostic: traces a specific Receipt Txn No through raw cashier files.
+
+Scans branch cashier XLSX/XLSM files for a target transaction number to verify
+whether a given sale was captured in the raw source before ETL processing.
+Useful for investigating specific transaction discrepancies.
+
+Input:  data/01_raw/sharepoint_downloads/{branch}/cashier_reports/*
+Output: console report showing whether the txn was found and in which file
+"""
+
 # import pandas as pd
 # import glob
 # from Portal_ML_V4.src.config.settings import BASE_DIR

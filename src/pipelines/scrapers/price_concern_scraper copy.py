@@ -1,3 +1,13 @@
+"""
+price_concern_scraper copy.py
+==============================
+Working copy of price_concern_scraper.py — kept for reference during active development.
+See price_concern_scraper.py for the current version.
+
+Input:  portalpharmacy.ke (live website)
+Output: scraped prices CSV (path set inside script)
+"""
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd

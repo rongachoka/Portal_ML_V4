@@ -1,3 +1,18 @@
+"""
+competitor_scraper.py
+=====================
+Scrapes competitor pharmacy websites for product pricing using Selenium + BeautifulSoup.
+
+Navigates product listing pages via a headless Chrome browser, extracts product
+names and prices, and saves results for price benchmarking.
+
+Input:  none (competitor URLs hardcoded inside script)
+Output: competitor price CSV saved to data/01_raw/ (path set inside script)
+
+Run manually for quarterly competitor price benchmarking.
+Requires Chrome + ChromeDriver (managed via webdriver_manager).
+"""
+
 import random
 import re
 import time

@@ -1,3 +1,15 @@
+"""
+delete_empty_folders.py
+=======================
+Utility: removes empty subdirectories from the Brand_Images_TopDown folder.
+
+Companion to check_4_empty_folder.py — after reviewing the list, run this
+to permanently remove confirmed empty brand image folders before training.
+
+Input:  G:/My Drive/Portal_ML/.../Brand_Images_TopDown/ (Google Drive path)
+Output: empty folders deleted; console log of removed paths
+"""
+
 import shutil
 from pathlib import Path
 

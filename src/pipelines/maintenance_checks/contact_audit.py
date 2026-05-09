@@ -1,3 +1,19 @@
+"""
+contact_audit.py
+================
+Diagnostic: audits contact ID quality in the raw Respond.io messages export.
+
+Loads Messages History CSV and checks for: missing contact IDs, duplicate
+message IDs, unexpected sender types, and date parsing errors. Prints a
+summary of data quality issues to the console.
+
+Input:  data/01_raw/Respond IO Messages History.csv
+Output: console report
+
+Run manually after each Respond.io export to verify data quality before
+running the pipeline.
+"""
+
 import pandas as pd
 from pathlib import Path
 

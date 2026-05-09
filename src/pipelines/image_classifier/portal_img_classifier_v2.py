@@ -1,3 +1,18 @@
+"""
+portal_img_classifier_v2.py
+============================
+Trains and evaluates a YOLOv8 brand image classifier for Portal Pharmacy products.
+
+Prepares a train/val/test split from the Brand_Images_TopDown dataset, generates
+a YOLO-format data.yaml, trains a YOLOv8 model (yolov8m.pt base), and evaluates
+classification accuracy per brand class.
+
+Input:  G:/My Drive/.../Brand_Images_TopDown/ — one subfolder per brand class
+Output: YOLO training run output in runs/classify/ (weights, metrics, confusion matrix)
+
+Run on a machine with a CUDA GPU. Training takes ~2 hours on the full dataset.
+"""
+
 import cv2
 import os
 import shutil

@@ -1,3 +1,19 @@
+"""
+quick_segment_extractor.py
+==========================
+Ad-hoc skincare customer segment extraction utility.
+
+Filters fact_sessions_enriched.csv to sessions with skincare-related tags,
+cross-references the Knowledge Base for matching products, and exports a
+segment CSV for Respond.io targeted broadcasts.
+
+Input:  data/03_processed/fact_sessions_enriched.csv
+        data/01_raw/Final_Knowledge_Base_PowerBI.csv
+Output: data/03_processed/respond_io/ad_hoc_skin_care_segment.csv
+
+Run manually as needed for campaign segmentation.
+"""
+
 import pandas as pd
 import numpy as np
 import re

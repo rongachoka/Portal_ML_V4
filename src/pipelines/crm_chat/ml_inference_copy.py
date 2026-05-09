@@ -1,3 +1,19 @@
+"""
+ml_inference_copy.py
+====================
+V3 ML inference — local variant called by run_pipeline_copy.py.
+
+Sessionises cleaned messages, applies CrossEncoder AI classification and
+heuristic signal detectors (M-Pesa, brands, zones, concerns), then writes
+the full tagged sessions file. Overwrites the output file on every run
+(no incremental append — that is a V4 feature in ml_inference.py).
+
+Input:  data/02_interim/cleaned_messages.parquet  (from cleaning_local_copy.py)
+Output: data/03_processed/final_tagged_sessions.parquet / .csv
+
+Entry point: run_ml_inference(batch_size=128)
+"""
+
 import pandas as pd
 import os
 import torch

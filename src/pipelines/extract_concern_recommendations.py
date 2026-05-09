@@ -1,3 +1,25 @@
+"""
+extract_concern_recommendations.py
+===================================
+Generates per-staff product recommendation reports based on concern patterns.
+
+For each staff member, identifies the most common customer concerns they handle,
+then fuzzy-matches those concerns against the Knowledge Base to recommend the
+most relevant products — prioritising items that have already converted.
+
+Inputs:
+    data/03_processed/fact_sessions_enriched.csv
+    data/01_raw/Final_Knowledge_Base_PowerBI.csv
+    data/03_processed/ai_daily_session_concerns.csv
+    data/03_processed/sales_attribution/social_sales_direct.csv
+
+Output:
+    data/03_processed/report_staff_recommendations.csv
+    — one row per (staff × concern × recommended product)
+
+Entry point: run_recommendation_extraction()
+"""
+
 import pandas as pd
 import numpy as np
 import re

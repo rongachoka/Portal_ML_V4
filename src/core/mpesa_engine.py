@@ -1,3 +1,17 @@
+"""
+mpesa_engine.py
+===============
+Detects and extracts M-Pesa payment confirmations from customer chat text.
+
+Input:  A raw chat session string (full_context).
+Output: Dict — { is_converted: bool, is_instruction: bool,
+                 amount: float | None, tx_code: list[str] }
+
+Called by ml_inference.py during the heuristic signal detection stage.
+Distinguishes actual payment receipts from payment instructions, cost
+mentions, and balance checks to avoid false positive conversions.
+"""
+
 import re
 import hashlib
 

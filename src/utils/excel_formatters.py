@@ -1,3 +1,19 @@
+"""
+excel_formatters.py
+===================
+Sanitises DataFrames for safe Excel export.
+
+Functions:
+    sanitize_scalar_for_excel(x) → any
+        Strips illegal control characters from string values so openpyxl
+        does not raise IllegalCharacterError on write.
+    sanitize_df_for_excel(df) → DataFrame
+        Applies sanitize_scalar_for_excel to every cell in a DataFrame.
+
+Input:  pandas DataFrame or scalar value (potentially containing control chars)
+Output: sanitised DataFrame / scalar ready to pass to df.to_excel()
+"""
+
 # src/utils/excel_formatters.py
 import pandas as pd
 import re

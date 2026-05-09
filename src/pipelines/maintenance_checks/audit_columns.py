@@ -1,3 +1,18 @@
+"""
+audit_columns.py
+================
+Diagnostic: validates column names in fact_sessions_enriched.csv.
+
+Checks each column for: excessive length (>80 chars), illegal special
+characters ([, ], #, @), and leading/trailing whitespace — issues that
+cause Power BI import errors or DAX expression failures.
+
+Input:  data/03_processed/fact_sessions_enriched.csv
+Output: console report of column name violations
+
+Run after any analytics pipeline change that adds new columns.
+"""
+
 # import pandas as pd
 # from Portal_ML_V4.src.config.settings import PROCESSED_DATA_DIR
 

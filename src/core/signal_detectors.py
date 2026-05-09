@@ -1,3 +1,26 @@
+"""
+signal_detectors.py
+===================
+Heuristic signal extractors applied to raw session text during ML inference.
+
+Functions:
+    extract_locations_zones(text) → list[str]
+        Detects Nairobi delivery zones mentioned in chat.
+    detect_brands(text) → set[str]
+        Returns canonical brand tags (e.g. "Brand: CeraVe") found in text.
+    detect_price_quote(text) → bool
+        True if staff sent a price quote in the session.
+    detect_price_objection(text) → bool
+        True if the customer expressed a price objection.
+    infer_concerns_from_text(text) → set[str]
+        Applies CONCERN_KEYWORDS regex patterns to detect health concerns.
+    _normalise_tags(tags) → list[str]
+        Deduplicates and sorts a tag list for consistent output.
+
+Input:  raw session text strings
+Output: sets/lists of tag strings added to the session record in ml_inference.py
+"""
+
 # src/core/signal_detectors.py
 import re
 from typing import Set, List

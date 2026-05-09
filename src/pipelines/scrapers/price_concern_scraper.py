@@ -1,3 +1,18 @@
+"""
+price_concern_scraper.py
+========================
+Scrapes product listings from the Portal Pharmacy website for KB price enrichment.
+
+Crawls portalpharmacy.ke product pages, extracts product name, price, and
+category, and saves a CSV used to update the Knowledge Base with current
+on-site prices.
+
+Input:  portalpharmacy.ke (live website)
+Output: data/01_raw/scraped_prices_jan2026.csv
+
+Run manually when refreshing KB prices. Respects rate limits with random delays.
+"""
+
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd

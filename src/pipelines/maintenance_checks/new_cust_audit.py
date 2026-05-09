@@ -1,3 +1,18 @@
+"""
+new_cust_audit.py
+=================
+Diagnostic: identifies genuinely new customers in the most recent Respond.io export.
+
+Loads the full Messages History CSV, determines each contact's first-ever message
+date, and flags contacts whose first contact falls within a configurable recent
+window — distinguishing new customers from returning ones.
+
+Input:  data/01_raw/Respond IO Messages History.csv
+Output: console report of new vs returning contact counts by time window
+
+Run manually to track new customer acquisition rates.
+"""
+
 import pandas as pd
 from pathlib import Path
 
