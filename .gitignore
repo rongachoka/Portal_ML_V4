@@ -52,3 +52,6 @@ reports/
 # ── Jupyter ───────────────────────────────────────────────
 .ipynb_checkpoints/
 *.ipynb
+
+# ── Digital Ocean ─────────────────────────────────────────
+digital_ocean/
