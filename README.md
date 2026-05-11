@@ -259,6 +259,23 @@ Portal_ML_V4/
 │   ├── sharepoint_paths.py       SharePoint folder path definitions per branch
 │   └── db.py                     PostgreSQL connection wrapper (used by downloader)
 │
+├── img_classification/
+│   └── brand_crawler.py         Crawls Bing/Google Images to build a brand image training dataset
+│                                Uses CLIP scoring, OCR brand verification, and perceptual hash
+│                                deduplication. Reads brand/category list from the Knowledge Base.
+│                                Outputs per-brand image folders + crawl_manifest.csv.
+│
+├── src/pipelines/image_classifier/
+│   ├── portal_img_classifier_v2.py  Trains a YOLOv8 brand image classifier on Brand_Images_TopDown.
+│   │                                Auto-annotates images with OpenCV bounding boxes, generates
+│   │                                YOLO data.yaml, trains yolov8m base model (50 epochs, 640px).
+│   │                                Requires CUDA GPU. Outputs to runs/classify/yolo_v1_medium/.
+│   ├── data_augmentation.py         Augments under-represented brand classes using Keras
+│   │                                ImageDataGenerator (rotation, zoom, flip, brightness).
+│   │                                Run before training when any brand class has fewer than 10 images.
+│   └── zip_file.py                  Google Colab utility — mounts Drive and zips the
+│                                    Brand_Images_TopDown training folder for backup/transfer.
+│
 ├── data/
 │   ├── 01_raw/                  Source inputs (Respond.io exports, KB, ads, website)
 │   │   ├── Respond IO Messages History.csv
@@ -292,6 +309,43 @@ Portal_ML_V4/
 ├── website_orders/              Website sales ETL (secondary path)
 └── archive/                     All superseded files, organised by pipeline area
 ```
+
+---
+
+## Image Classification Pipeline
+
+A separate pipeline that builds and trains a brand image classifier so Portal can auto-identify product brands from packaging photos.
+
+### Components
+
+| File | Purpose |
+|---|---|
+| `img_classification/brand_crawler.py` | Crawls Bing Images (fallback: Google) to collect per-brand product packaging photos. Uses CLIP scoring to filter out non-product images, OCR + URL metadata to verify the correct brand appears, and perceptual hashing to deduplicate near-identical downloads. Reads brand and category list directly from `Final_Knowledge_Base_PowerBI_New.csv`. Outputs to `G:/My Drive/.../Brand_Images_NEW/` with one subfolder per brand. |
+| `src/pipelines/image_classifier/data_augmentation.py` | Runs Keras `ImageDataGenerator` over each brand folder that is below the minimum image count. Generates synthetic variations (rotation ±25°, zoom 0.8–1.2×, horizontal flip, brightness 0.6–1.4×) and saves them alongside originals. Run this before training whenever a brand class has fewer than 10 images. |
+| `src/pipelines/image_classifier/portal_img_classifier_v2.py` | Trains a YOLOv8 Medium (`yolov8m.pt`) image classifier on the `Brand_Images_TopDown` dataset. Auto-annotates images with OpenCV contour detection (white-background segmentation → YOLO bounding box format), generates `data.yaml`, performs an 80/20 train/val split, and runs 50-epoch training. Requires a CUDA GPU (~2 hours on the full dataset). |
+| `src/pipelines/image_classifier/zip_file.py` | Google Colab helper — mounts Drive, zips `Brand_Images_TopDown` to `Brand_Images_TopDown_Zipped.zip`. Run inside a Colab notebook before training on a new environment. |
+
+### Workflow
+
+```
+1. Run brand_crawler.py          → collect raw images from Bing/Google per brand
+2. Review and clean Brand_Images_NEW/ folders manually
+3. Run data_augmentation.py      → top up brands with < 10 images
+4. (Optional) zip_file.py        → zip dataset in Colab for transfer
+5. Run portal_img_classifier_v2.py → train YOLOv8 on the prepared dataset
+6. Outputs:  runs/classify/yolo_v1_medium/weights/best.pt   (production weights)
+             runs/classify/yolo_v1_medium/                  (metrics, confusion matrix)
+```
+
+### Dependencies (image classifier only)
+
+```bash
+pip install ultralytics torch torchvision opencv-python scikit-learn tqdm pyyaml
+pip install selenium webdriver-manager transformers imagehash pytesseract pillow requests pandas
+pip install tensorflow  # for data_augmentation.py only
+```
+
+Install [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) separately for stronger brand verification in `brand_crawler.py`.
 
 ---
 

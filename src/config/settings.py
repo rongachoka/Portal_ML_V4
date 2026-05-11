@@ -73,6 +73,8 @@ LOOKBACK_WINDOW_DAYS = 30          # Window for ad attribution
 # --- USD KES EXCHANGE RATE ---
 USD_KES_EXCHANGE_RATE = 130 
 
+DRIVE_ID = "b!whL3rPzNh0-7qRe5yrHoftRvAUJj1gFFvAMiiq_bJDX64liSkv0CSZtdTu6bqccj"
+
 
 # --------------------------------------------------------- #
 # ==========================================
