@@ -289,7 +289,7 @@ def read_sales_staging(engine, branch: str, after_date=None) -> pd.DataFrame:
         sql = text("""
             SELECT
                 branch, department, category, item, description,
-                on_hand, last_sold, qty_sold, total_tax_ex,
+                on_hand, last_sold, qty_sold, total_tax_ex, total_sales_amount,
                 transaction_id, date_sold, sale_time, sale_datetime
             FROM stg_sales_reports
             WHERE branch = :branch
@@ -300,7 +300,7 @@ def read_sales_staging(engine, branch: str, after_date=None) -> pd.DataFrame:
         sql = text("""
             SELECT
                 branch, department, category, item, description,
-                on_hand, last_sold, qty_sold, total_tax_ex,
+                on_hand, last_sold, qty_sold, total_tax_ex, total_sales_amount,
                 transaction_id, date_sold, sale_time, sale_datetime
             FROM stg_sales_reports
             WHERE branch = :branch
@@ -644,6 +644,14 @@ def merge_and_transform(
         df_merged["total_tax_ex"], errors="coerce"
     ).fillna(0)
 
+    df_merged["total_sales_amount"] = pd.to_numeric(
+        df_merged.get("total_sales_amount", pd.Series(dtype="float64")),
+        errors="coerce",
+    ).fillna(0)
+    # Fallback: pre-format rows (new column absent/zero) use total_tax_ex
+    pre_format = (df_merged["total_sales_amount"] == 0) & (df_merged["total_tax_ex"] != 0)
+    df_merged.loc[pre_format, "total_sales_amount"] = df_merged.loc[pre_format, "total_tax_ex"]
+
     if "amount" not in df_merged.columns:
         df_merged["amount"] = 0.0
     else:
@@ -655,7 +663,7 @@ def merge_and_transform(
 
     df_merged["pos_txn_sum"] = df_merged.groupby(
         ["transaction_id", "date_sold", "_client_for_groupby"]
-    )["total_tax_ex"].transform("sum")
+    )["total_sales_amount"].transform("sum")
 
     # real_transaction_value = always POS sum (cashier amount unreliable)
     df_merged["real_transaction_value"] = df_merged["pos_txn_sum"]
@@ -713,50 +721,51 @@ def load_fact_lineitems(cur, df: pd.DataFrame) -> int:
         INSERT INTO fact_sales_lineitems (
             location, transaction_id,
             department, category, item, description,
-            qty_sold, total_tax_ex,
+            qty_sold, total_tax_ex, total_sales_amount,
             date_sold, sale_date, sale_date_str,
             client_name, phone_number, sales_rep,
             txn_type, ordered_via,
             cashier_amount, transaction_total, audit_status
         ) VALUES %s
         ON CONFLICT (location, transaction_id, description, total_tax_ex) DO UPDATE SET
-            department        = EXCLUDED.department,
-            category          = EXCLUDED.category,
-            item              = EXCLUDED.item,
-            qty_sold          = EXCLUDED.qty_sold,
-            date_sold         = EXCLUDED.date_sold,
-            sale_date         = EXCLUDED.sale_date,
-            sale_date_str     = EXCLUDED.sale_date_str,
-            client_name       = EXCLUDED.client_name,
-            phone_number      = EXCLUDED.phone_number,
-            sales_rep         = EXCLUDED.sales_rep,
-            txn_type          = EXCLUDED.txn_type,
-            ordered_via       = EXCLUDED.ordered_via,
-            cashier_amount    = EXCLUDED.cashier_amount,
-            transaction_total = EXCLUDED.transaction_total,
-            audit_status      = EXCLUDED.audit_status,
-            loaded_at         = NOW()
+            department          = EXCLUDED.department,
+            category            = EXCLUDED.category,
+            item                = EXCLUDED.item,
+            qty_sold            = EXCLUDED.qty_sold,
+            total_sales_amount  = EXCLUDED.total_sales_amount,
+            date_sold           = EXCLUDED.date_sold,
+            sale_date           = EXCLUDED.sale_date,
+            sale_date_str       = EXCLUDED.sale_date_str,
+            client_name         = EXCLUDED.client_name,
+            phone_number        = EXCLUDED.phone_number,
+            sales_rep           = EXCLUDED.sales_rep,
+            txn_type            = EXCLUDED.txn_type,
+            ordered_via         = EXCLUDED.ordered_via,
+            cashier_amount      = EXCLUDED.cashier_amount,
+            transaction_total   = EXCLUDED.transaction_total,
+            audit_status        = EXCLUDED.audit_status,
+            loaded_at           = NOW()
         WHERE
-            fact_sales_lineitems.department        IS DISTINCT FROM EXCLUDED.department
-            OR fact_sales_lineitems.category          IS DISTINCT FROM EXCLUDED.category
-            OR fact_sales_lineitems.item              IS DISTINCT FROM EXCLUDED.item
-            OR fact_sales_lineitems.qty_sold          IS DISTINCT FROM EXCLUDED.qty_sold
-            OR fact_sales_lineitems.date_sold         IS DISTINCT FROM EXCLUDED.date_sold
-            OR fact_sales_lineitems.sale_date         IS DISTINCT FROM EXCLUDED.sale_date
-            OR fact_sales_lineitems.sale_date_str     IS DISTINCT FROM EXCLUDED.sale_date_str
-            OR fact_sales_lineitems.client_name       IS DISTINCT FROM EXCLUDED.client_name
-            OR fact_sales_lineitems.phone_number      IS DISTINCT FROM EXCLUDED.phone_number
-            OR fact_sales_lineitems.sales_rep         IS DISTINCT FROM EXCLUDED.sales_rep
-            OR fact_sales_lineitems.txn_type          IS DISTINCT FROM EXCLUDED.txn_type
-            OR fact_sales_lineitems.ordered_via       IS DISTINCT FROM EXCLUDED.ordered_via
-            OR fact_sales_lineitems.cashier_amount    IS DISTINCT FROM EXCLUDED.cashier_amount
-            OR fact_sales_lineitems.transaction_total IS DISTINCT FROM EXCLUDED.transaction_total
-            OR fact_sales_lineitems.audit_status      IS DISTINCT FROM EXCLUDED.audit_status
+            fact_sales_lineitems.department         IS DISTINCT FROM EXCLUDED.department
+            OR fact_sales_lineitems.category           IS DISTINCT FROM EXCLUDED.category
+            OR fact_sales_lineitems.item               IS DISTINCT FROM EXCLUDED.item
+            OR fact_sales_lineitems.qty_sold           IS DISTINCT FROM EXCLUDED.qty_sold
+            OR fact_sales_lineitems.total_sales_amount IS DISTINCT FROM EXCLUDED.total_sales_amount
+            OR fact_sales_lineitems.date_sold          IS DISTINCT FROM EXCLUDED.date_sold
+            OR fact_sales_lineitems.sale_date          IS DISTINCT FROM EXCLUDED.sale_date
+            OR fact_sales_lineitems.sale_date_str      IS DISTINCT FROM EXCLUDED.sale_date_str
+            OR fact_sales_lineitems.client_name        IS DISTINCT FROM EXCLUDED.client_name
+            OR fact_sales_lineitems.phone_number       IS DISTINCT FROM EXCLUDED.phone_number
+            OR fact_sales_lineitems.sales_rep          IS DISTINCT FROM EXCLUDED.sales_rep
+            OR fact_sales_lineitems.txn_type           IS DISTINCT FROM EXCLUDED.txn_type
+            OR fact_sales_lineitems.ordered_via        IS DISTINCT FROM EXCLUDED.ordered_via
+            OR fact_sales_lineitems.cashier_amount     IS DISTINCT FROM EXCLUDED.cashier_amount
+            OR fact_sales_lineitems.transaction_total  IS DISTINCT FROM EXCLUDED.transaction_total
+            OR fact_sales_lineitems.audit_status       IS DISTINCT FROM EXCLUDED.audit_status
     """
 
-
     # ── Vectorized column prep — eliminates per-row Python overhead ───────────
-    for col in ("qty_sold", "total_tax_ex", "amount", "pos_txn_sum"):
+    for col in ("qty_sold", "total_tax_ex", "total_sales_amount", "amount", "pos_txn_sum"):
         if col in df.columns:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
@@ -774,6 +783,7 @@ def load_fact_lineitems(cur, df: pd.DataFrame) -> int:
         "description",
         "qty_sold",
         "total_tax_ex",
+        "total_sales_amount",
         "_date_sold_str",
         "sale_date",
         "sale_date_str",

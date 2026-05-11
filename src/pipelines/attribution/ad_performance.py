@@ -182,6 +182,7 @@ def load_meta_ads() -> pd.DataFrame:
 
     # Deduplicate — Meta exports can repeat an ad across date ranges
     before_dedup = len(df)
+    df = df.sort_values("Amount spent (USD)", ascending=False)
     df = df.drop_duplicates(subset=["Ad ID"])
     if before_dedup > len(df):
         print(f"   ✂️  Deduped {before_dedup - len(df):,} repeated Ad ID rows (kept row with highest spend)")
@@ -319,7 +320,7 @@ def compute_product_level_stats(df_sales_raw: pd.DataFrame) -> pd.DataFrame:
 
     # ── Group at (Ad ID, Matched_Product) grain ────────────────────────
     prod_stats = (
-        df_sales_raw.groupby(["Ad ID", "Matched_Product"], dropna=False)
+        df_sales_raw.groupby(["Ad ID", "Matched_Product"], dropna=True)
         .agg(
             product_qty_sold        = ("Qty Sold",       "sum"),
             product_revenue_kes     = ("Total (Tax Ex)", "sum"),
@@ -416,6 +417,14 @@ def run_ad_performance():
         "products_bought",
     ]
     df_final = df[[c for c in final_cols if c in df.columns]].copy()
+
+    before = len(df_final)
+    df_final = df_final[
+        df_final["Ad ID"].notna() &
+        (df_final["Ad ID"].astype(str).str.strip() != "")
+    ].copy()
+    if len(df_final) < before:
+        print(f"   ⚠️  Dropped {before - len(df_final)} rows with blank Ad ID before saving")
 
     # ── 8. Save performance table ──────────────────────────────────────
     os.makedirs(OUTPUT_DIR, exist_ok=True)
