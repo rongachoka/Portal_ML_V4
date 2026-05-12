@@ -40,6 +40,7 @@ from pathlib import Path
 
 from Portal_ML_V4.sharepoint.sharepoint_client import SharePointClient
 from Portal_ML_V4.sharepoint.sharepoint_parser import (
+    classify_sales_file,
     finish_run,
     get_branch_watermark,
     process_cashier_file,
@@ -76,6 +77,8 @@ BRANCHES = [
 SALE_EXTENSIONS    = {".csv", ".xlsx"}
 CASHIER_EXTENSIONS = {".xlsm"}
 QTY_EXTENSIONS     = {".csv", ".xlsx"}
+SALES_LOAD_MODE    = os.getenv("SALES_LOAD_MODE", "all").strip().lower()
+BRANCH_FILTER_RAW  = os.getenv("BRANCH_FILTER", "")
 
 _MONTH_MAP = {
     "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
@@ -238,6 +241,17 @@ def find_root_folder_by_name(client: SharePointClient, folder_name: str) -> dict
 
 def normalize_branch_name(name: str) -> str:
     return re.sub(r"\s+", " ", name).strip()
+
+
+def branch_selected(branch: str) -> bool:
+    branch_filter = {
+        normalize_branch_name(part).lower()
+        for part in BRANCH_FILTER_RAW.split(",")
+        if part.strip()
+    }
+    if not branch_filter:
+        return True
+    return normalize_branch_name(branch).lower() in branch_filter
 
 
 def detect_branch_from_filename(filename: str) -> str | None:
@@ -403,6 +417,9 @@ def _process_cashier_month_folder(
         if not branch:
             logger.warning(f"[Cashier] Unknown branch, skipping: {filename}")
             continue
+        if not branch_selected(branch):
+            logger.info(f"[Cashier] Skipping branch outside filter: {filename}")
+            continue
 
         local_path       = ensure_branch_folder(branch) / "cashier_reports" / filename
         newly_downloaded = should_download(local_path, item)
@@ -456,6 +473,9 @@ def download_sales_reports(client: SharePointClient) -> list[dict]:
             continue
 
         branch_name          = normalize_branch_name(branch_folder["name"])
+        if not branch_selected(branch_name):
+            logger.info(f"[Sales] Skipping branch outside filter: {branch_name}")
+            continue
         sales_reports_folder = _find_sales_reports_folder(client, branch_folder["id"])
 
         if not sales_reports_folder:
@@ -520,6 +540,18 @@ def _process_sales_reports_folder(
         if suffix not in SALE_EXTENSIONS:
             continue
 
+        file_mode = classify_sales_file(filename)
+        if SALES_LOAD_MODE == "historical_only" and file_mode != "historical":
+            logger.info(
+                f"[Sales] Skipping non-historical file in historical_only mode: {filename}"
+            )
+            continue
+        if SALES_LOAD_MODE == "incremental_only" and file_mode != "incremental":
+            logger.info(
+                f"[Sales] Skipping non-incremental file in incremental_only mode: {filename}"
+            )
+            continue
+
         local_path       = (
             ensure_branch_folder(branch_name) / "sales_reports" / filename
         )
@@ -575,6 +607,9 @@ def download_qty_lists(client: SharePointClient) -> list[dict]:
 
         if branch_name not in BRANCHES:
             logger.debug(f"[Qty] Skipping non-branch folder: {branch_name}")
+            continue
+        if not branch_selected(branch_name):
+            logger.info(f"[Qty] Skipping branch outside filter: {branch_name}")
             continue
 
         logger.info(f"[Qty] Scanning branch folder: {branch_name}")
@@ -669,6 +704,8 @@ def build_combined_exports() -> None:
     cashier_dfs = []
 
     for branch in BRANCHES:
+        if not branch_selected(branch):
+            continue
         branch_dir = LOCAL_BASE_DIR / branch
 
         if not branch_dir.exists():

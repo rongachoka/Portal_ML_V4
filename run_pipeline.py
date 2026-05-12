@@ -150,7 +150,7 @@ def _run_enrichment():
     run_smart_enrichment()
 
 def _run_staff():
-    from Portal_ML_V4.src.pipelines.crm_chat.staff_performance import run_staff_analysis
+    from Portal_ML_V4.src.pipelines.crm_chat.staff_performance_old import run_staff_analysis
     run_staff_analysis()
 
 def _run_journey():

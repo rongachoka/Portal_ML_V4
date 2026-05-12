@@ -94,6 +94,7 @@ CREATE TABLE IF NOT EXISTS stg_sales_reports (
     -- Audit (inline — no join needed for basic tracing)
     source_file_id      INTEGER         REFERENCES ingestion_files(id),
     source_filename     TEXT,
+    source_row_num      INTEGER,
 
     -- Location
     branch              TEXT            NOT NULL,
@@ -124,6 +125,11 @@ CREATE INDEX IF NOT EXISTS idx_stg_sales_date_sold
     ON stg_sales_reports (date_sold);
 CREATE INDEX IF NOT EXISTS idx_stg_sales_source_file
     ON stg_sales_reports (source_file_id);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_stg_sales_source_row
+    ON stg_sales_reports (source_file_id, source_row_num)
+    WHERE source_file_id IS NOT NULL
+      AND source_row_num IS NOT NULL;
 
 
 -- ============================================================

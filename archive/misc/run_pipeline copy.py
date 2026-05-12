@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__))))
 from Portal_ML_V4.src.pipelines.crm_chat.cleaning import run_production_cleaning
 from Portal_ML_V4.src.pipelines.crm_chat.ml_inference import run_ml_inference
 from Portal_ML_V4.src.pipelines.crm_chat.analytics import run_analytics_pipeline
-from Portal_ML_V4.src.pipelines.crm_chat.staff_performance import run_staff_analysis
+from Portal_ML_V4.src.pipelines.crm_chat.staff_performance_old import run_staff_analysis
 from Portal_ML_V4.src.pipelines.crm_chat.analyze_concern_journey import run_journey_analysis
 from Portal_ML_V4.src.pipelines.extract_concern_recommendations import run_recommendation_extraction
 from Portal_ML_V4.src.pipelines.attribution.enrich_attribution_products import run_smart_enrichment

@@ -754,7 +754,31 @@ def _to_str(value) -> str | None:
 # SALES PARSER
 # ══════════════════════════════════════════════════════════════════════════════
 
-def parse_sales_file(path: Path) -> pd.DataFrame:
+def _sales_cutoff_for_branch(branch: str) -> date | None:
+    """
+    Branch-specific handover date where the new-format CSV becomes the
+    source of truth. Old-format historical files must stop before this date.
+    """
+    return {
+        "ABC": date(2025, 6, 1),
+        "Centurion 2R": date(2025, 6, 1),
+        "Galleria": date(2025, 6, 1),
+        "Milele": date(2025, 6, 1),
+        "Portal 2R": date(2025, 6, 1),
+        "Portal CBD": date(2025, 6, 2),
+    }.get(branch)
+
+
+def _is_old_sales_format(columns: list[str]) -> bool:
+    """
+    Historical exports predate Total Sales Amount and the other new sales
+    columns. Use that absence to detect files that need the handover cutoff.
+    """
+    normalized = {str(col).strip() for col in columns}
+    return "Total Sales Amount" not in normalized
+
+
+def parse_sales_file(path: Path, end_date: date | None = None) -> pd.DataFrame:
     """
     Read a sales CSV or XLSX.
     - Strips column name whitespace
@@ -777,6 +801,7 @@ def parse_sales_file(path: Path) -> pd.DataFrame:
         raise ValueError(f"Unsupported sales file type: {suffix}")
 
     df = _strip_columns(df)
+    original_columns = list(df.columns)
 
     # Fill new columns with None before validation so old files pass the check
     for col in SALES_NEW_COLUMNS:
@@ -798,6 +823,8 @@ def parse_sales_file(path: Path) -> pd.DataFrame:
     df["Date Sold"]          = df["Date Sold Datetime"].apply(
         lambda dt: None if pd.isna(dt) else dt.date()
     )
+    is_old_format = _is_old_sales_format(original_columns)
+
     df["On Hand"]            = pd.to_numeric(df["On Hand"],            errors="coerce")
     df["Qty Sold"]           = pd.to_numeric(df["Qty Sold"],           errors="coerce")
     df["Unit Cost"]          = pd.to_numeric(df["Unit Cost"],          errors="coerce")
@@ -810,6 +837,16 @@ def parse_sales_file(path: Path) -> pd.DataFrame:
     df["Sales Rep ID"]       = df["Sales Rep ID"].astype(str).str.strip().where(
         df["Sales Rep ID"].notna(), None
     )
+
+    if end_date is not None and is_old_format:
+        df = df[
+            df["Date Sold"].apply(lambda d: d is not None and d < end_date)
+        ].copy()
+
+    # Preserve stable per-file row identity so legitimate duplicate-looking
+    # rows within a single source file are not collapsed at insert time.
+    df = df.reset_index(drop=True)
+    df["_source_row_num"] = df.index + 1
 
     return df
 
@@ -872,6 +909,7 @@ def parse_sales_file_after_date(
     path: Path,
     after_date: date,
     after_datetime: datetime | None = None,
+    end_date: date | None = None,
 ) -> pd.DataFrame:
     """
     Read a sales file and return only rows newer than the watermark.
@@ -884,7 +922,7 @@ def parse_sales_file_after_date(
       3. If after_datetime is None
          → keep row if Date Sold > after_date  (old behaviour, unchanged)
     """
-    df = parse_sales_file(path)
+    df = parse_sales_file(path, end_date=end_date)
     if df.empty:
         return df
  
@@ -986,10 +1024,20 @@ def elect_canonical_file(
     return canonical, incrementals, skipped
 
 
+def _is_cumulative_sales_snapshot(filename: str) -> bool:
+    """
+    New-format sales_report exports are cumulative snapshots, not independent
+    daily deltas. Once the latest one is elected canonical, older snapshots
+    must not also be loaded or they inflate revenue totals.
+    """
+    return filename.lower().startswith("sales_report_")
+
+
 def merge_sales_files_v2(
     file_records: list[dict],
     watermark: date | None,
     watermark_dt: datetime | None = None, # New additon for datetime-aware merging
+    end_date: date | None = None,
 ) -> tuple[pd.DataFrame, list[int], date | None]:
     """
     Load and merge sales files using canonical election + watermark logic.
@@ -1018,6 +1066,18 @@ def merge_sales_files_v2(
         logger.warning("[Sales] No files with new data found — nothing to load")
         return pd.DataFrame(), [], None
 
+    if _is_cumulative_sales_snapshot(canonical["filename"]) and incrementals:
+        logger.info(
+            f"[Sales] Canonical {canonical['filename']} is a cumulative snapshot; "
+            f"skipping {len(incrementals)} overlapping incremental file(s)."
+        )
+        for rec in incrementals:
+            mark_file_status(rec["file_id"], "skipped")
+            logger.info(
+                f"[Sales] Skipped overlapping snapshot: {rec['filename']}"
+            )
+        incrementals = []
+
     frames        = []
     contributing  = []
 
@@ -1028,7 +1088,9 @@ def merge_sales_files_v2(
             # Load only rows newer than the watermark — avoids re-reading 3 years
             # df_can = parse_sales_file_after_date(path, watermark)
             # load_reason = f"canonical_incremental (after {watermark})"
-            df_can = parse_sales_file_after_date(path, watermark, watermark_dt)
+            df_can = parse_sales_file_after_date(
+                path, watermark, watermark_dt, end_date=end_date
+            )
             load_reason = (
                 f"canonical_incremental (after datetime {watermark_dt})"
                 if watermark_dt else
@@ -1037,7 +1099,7 @@ def merge_sales_files_v2(
             
         else:
             # First run — load everything
-            df_can = parse_sales_file(path)
+            df_can = parse_sales_file(path, end_date=end_date)
             load_reason = "canonical_full"
 
         if not df_can.empty:
@@ -1071,9 +1133,11 @@ def merge_sales_files_v2(
             # else:
             #     df_inc = parse_sales_file(path)
             if watermark:
-                df_inc = parse_sales_file_after_date(path, watermark, watermark_dt)
+                df_inc = parse_sales_file_after_date(
+                    path, watermark, watermark_dt, end_date=end_date
+                )
             else:
-                df_inc = parse_sales_file(path)
+                df_inc = parse_sales_file(path, end_date=end_date)
 
             if not df_inc.empty:
                 df_inc["_source_file_id"]  = rec["file_id"]
@@ -1102,11 +1166,20 @@ def merge_sales_files_v2(
     # Sort so canonical rows come first; incremental override on keep='last'
     combined = combined.sort_values("_file_priority")
 
-    # Deduplicate — safety net for any overlap between canonical and incrementals
+    # Deduplicate only across different source files.
+    # If a single source file contains repeated-looking rows, keep them both:
+    # the sales report total already includes them, and dropping them causes
+    # understated branch revenue.
     missing_dedup = [c for c in SALES_DEDUP_COLUMNS if c not in combined.columns]
     if not missing_dedup:
         before = len(combined)
-        combined = combined.drop_duplicates(subset=SALES_DEDUP_COLUMNS, keep="last")
+        grouped_frames = []
+        for _, group in combined.groupby(SALES_DEDUP_COLUMNS, dropna=False, sort=False):
+            if group["_source_file_id"].nunique() <= 1:
+                grouped_frames.append(group)
+            else:
+                grouped_frames.append(group.tail(1))
+        combined = pd.concat(grouped_frames, ignore_index=True)
         dropped = before - len(combined)
         if dropped > 0:
             logger.info(f"[Sales] Deduplication removed {dropped:,} duplicate rows")
@@ -1145,7 +1218,7 @@ def merge_sales_files_v2(
 def _insert_sales_rows(conn, df: pd.DataFrame, branch: str) -> int:
     """Insert merged sales rows into stg_sales_reports."""
     columns = [
-        "source_file_id", "source_filename", "branch",
+        "source_file_id", "source_filename", "source_row_num", "branch",
         "department", "category", "item", "description",
         "on_hand", "unit_cost", "last_sold", "qty_sold", "total_tax_ex",
         "tax_amount", "total_sales_amount", "total_cost",
@@ -1157,6 +1230,7 @@ def _insert_sales_rows(conn, df: pd.DataFrame, branch: str) -> int:
         rows.append((
             row.get("_source_file_id"),
             row.get("_source_filename"),
+            row.get("_source_row_num"),
             branch,
             _to_str(row.get("Department")),
             _to_str(row.get("Category")),
@@ -1179,8 +1253,7 @@ def _insert_sales_rows(conn, df: pd.DataFrame, branch: str) -> int:
         ))
 
     CONFLICT_COLS = [
-        "transaction_id", "branch", "date_sold",
-        "description", "qty_sold", "total_tax_ex",
+        "source_file_id", "source_row_num",
     ]
     attempted, skipped = bulk_insert_safe(
         conn, "stg_sales_reports", columns, rows,
@@ -1354,6 +1427,7 @@ def process_sales_branch(
     Returns stats dict.
     """
     stats = {"processed": 0, "failed": 0, "skipped": 0}
+    end_date = _sales_cutoff_for_branch(branch)
 
     # ── Step 1: Read watermark ─────────────────────────────────────────────
     # watermark = get_branch_watermark(branch)
@@ -1409,7 +1483,7 @@ def process_sales_branch(
     #     )
     try:
         merged_df, contributing_ids, new_max_date = merge_sales_files_v2(
-            registered, watermark, watermark_dt
+            registered, watermark, watermark_dt, end_date=end_date
         )
     except Exception as exc:
         logger.error(f"[Sales][{branch}] merge failed: {exc}")

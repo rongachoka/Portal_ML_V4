@@ -9,7 +9,7 @@ try:
     from Portal_ML_V4.src.pipelines.crm_chat.ml_inference import run_ml_inference
     from Portal_ML_V4.src.pipelines.crm_chat.analytics import run_analytics_pipeline
     from Portal_ML_V4.src.pipelines.attribution.link_social_to_pos_fuzzy import run_attribution_pipeline
-    from Portal_ML_V4.src.pipelines.crm_chat.staff_performance import run_staff_analysis
+    from Portal_ML_V4.src.pipelines.crm_chat.staff_performance_old import run_staff_analysis
     from Portal_ML_V4.src.pipelines.crm_chat.analyze_brand_performance import run_brand_analysis
     # Optional: Journey/Concern scripts
     from Portal_ML_V4.src.pipelines.extract_concern_recommendations import run_recommendation_extraction
